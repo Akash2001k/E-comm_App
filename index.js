@@ -5,6 +5,10 @@ const User = require("./db/User")
 const Product = require("./db/Product")
 const dotenv = require('dotenv')
 
+const router = express.Router()
+
+// const router = express.Router();
+
 const Jwt = require('jsonwebtoken');
 
 dotenv.config({path:"config.env"})
@@ -25,8 +29,11 @@ app.use(express.json());
 
 app.use(cors(corsOptions))
 
+app.use(router)
+
 //=============== Register user ==================================
-app.post("/register", async (req, resp) => {
+
+router.route('/register').post(async (req, resp) => {
    let user = new User(req.body);
    let result = await user.save();
    result = result.toObject();
@@ -41,8 +48,9 @@ app.post("/register", async (req, resp) => {
    })
 })
 
+
 //=============== Login user ==================================
-app.post("/login", async (req, resp) => {
+router.route("/login").post(async (req, resp) => {
    if (req.body.password && req.body.email) {
       let user = await User.findOne(req.body).select("-password");
       if (user) {
@@ -65,15 +73,17 @@ app.post("/login", async (req, resp) => {
 
 })
 
+
+
 //=============== Add Product ==================================
-app.post("/add-product", async (req, resp) => {
+router.route('/add-product').post(async (req, resp) => {
    let product = new Product(req.body);
    let result = await product.save();
    resp.send(result)
 })
 
 //=============== Get Product ==================================
-app.get("/product", async (req, resp) => {
+router.route("/product").get(async (req, resp) => {
    let products = await Product.find()
    if (products.length > 0) {
       resp.send(products)
@@ -87,7 +97,7 @@ app.get("/product", async (req, resp) => {
 })
 
 //===================== Delete Product ===============================
-app.delete("/product/:id", async (req, resp) => {
+router.route("/product/:id").delete(async (req, resp) => {
    let product = Product.findById(req.params.id)
 
    if(!product){
@@ -100,8 +110,9 @@ app.delete("/product/:id", async (req, resp) => {
    await product.deleteOne()
 })
 
+
 //========================== Get Product for Update ==========================
-app.get("/product/:id", async (req, resp) => {
+router.route("/product/:id").get(async (req, resp) => {
    try {
       let result = await Product.findOne({ _id: req.params.id })
       if (result) {
@@ -116,7 +127,7 @@ app.get("/product/:id", async (req, resp) => {
 })
 
 //======================= Update Product ===============================
-app.put("/product/:id", async (req, resp) => {
+router.route("/product/:id").put(async (req, resp) => {
    let result = await Product.updateOne(
       { _id: req.params.id },
       {
@@ -124,10 +135,11 @@ app.put("/product/:id", async (req, resp) => {
       }
    )
    resp.send(result)
-});
+})
+
 
 // ===================== Search Product ==================================
-app.get("/search/:key", async (req, resp) => {
+router.route("/search/:key").get( async (req, resp) => {
    let result = await Product.find({
       "$or": [
          { name: { $regex: req.params.key, $options: 'i' } },
@@ -160,8 +172,6 @@ app.get("/search/:key", async (req, resp) => {
 //    //   console.log("Middleware Called",token)
 // }
 
-port = process.env.PORT || 5000
+app.listen(process.env.PORT || 5000)
 
-app.listen(port)
-
-console.log(`Server is running at - ${port}`)
+console.log(`Server is running at - ${process.env.PORT || 5000}`)
