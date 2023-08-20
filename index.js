@@ -31,6 +31,10 @@ app.use(cors(corsOptions))
 
 app.use(router)
 
+router.route('/').get((req, resp) => {
+   resp.send("Hello, This is ecommerce app")
+})
+
 //=============== Register user ==================================
 
 router.route('/register').post(async (req, resp) => {
